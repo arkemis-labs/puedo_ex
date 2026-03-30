@@ -24,7 +24,11 @@ defmodule PuedoEcto.MixProject do
   defp deps do
     [
       {:puedo, path: "../puedo"},
-      {:ecto, "~> 3.13.0"}
+      {:ecto, "~> 3.13.0"},
+      {:ecto_sql, "~> 3.13"},
+
+      # Optional
+      {:postgrex, "~> 0.22.0", optional: true}
     ]
   end
 end
