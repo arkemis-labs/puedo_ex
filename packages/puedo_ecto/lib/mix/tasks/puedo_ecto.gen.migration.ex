@@ -6,68 +6,66 @@ defmodule Mix.Tasks.PuedoEcto.Gen.Migration do
   @moduledoc """
   Copies Ecto migrations from the puedo_ecto package into your project's priv directory.
 
-  The destination folder is derived from the repo's adapter.
+  The destination folder is derived from the engine.
 
   ## Usage
 
-      mix puedo_ecto.gen.migration --repo MyApp.Repo
-      mix puedo_ecto.gen.migration -r MyApp.Repo
+      mix puedo_ecto.gen.migration --engine your_engine
+      mix puedo_ecto.gen.migration -e your_engine
+      mix puedo_ecto.gen.migration --list
 
   ## Options
 
-    * `--repo`, `-r` - the Ecto repo module (required)
+    * `--engine`, `-e` - the Database engine (default to postgres)
+    * `--list`, `-l`   - list all supported engines
   """
 
-  @supported_adapters %{
-    Ecto.Adapters.Postgres => "postgres"
-  }
+  @supported_engines ["postgres"]
 
   @impl true
   def run(args) do
-    {opts, _} = OptionParser.parse!(args, strict: [repo: :string], aliases: [r: :repo])
+    {opts, _} =
+      OptionParser.parse!(args,
+        strict: [engine: :string, list: :boolean],
+        aliases: [e: :engine, l: :list]
+      )
 
-    repo_name =
-      opts[:repo] ||
-        Mix.raise("No repo provided. Use: mix puedo_ecto.gen.migration --repo MyApp.Repo")
+    if opts[:list] do
+      Mix.shell().info("Supported engines:")
+      Enum.each(@supported_engines, &Mix.shell().info("  * #{&1}"))
+    else
+      engine =
+        opts[:engine] ||
+          Mix.raise("No engine provided. Use: mix puedo_ecto.gen.migration --engine your_engine")
 
-    Mix.Task.run("compile", [])
+      folder =
+        Enum.find(@supported_engines, &(&1 == engine)) || "postgres"
 
-    repo = Module.concat([repo_name])
+      Mix.Task.run("compile", [])
 
-    adapter = repo.__adapter__()
+      source_dir = Application.app_dir(:puedo_ecto, Path.join(["priv", "migrations", folder]))
 
-    folder =
-      Map.get(@supported_adapters, adapter) ||
-        Mix.raise(
-          "Unsupported adapter: #{inspect(adapter)}. " <>
-            "Supported adapters: #{@supported_adapters |> Map.keys() |> Enum.map_join(", ", &inspect/1)}"
-        )
+      dest_dir = Path.join([File.cwd!(), "priv", "migrations", "puedo_ecto"])
 
-    source_dir = Application.app_dir(:puedo_ecto, Path.join(["priv", "migrations", folder]
-))
+      File.mkdir_p!(dest_dir)
 
+      source_dir
+      |> File.ls!()
+      |> Enum.each(fn file ->
+        src = Path.join(source_dir, file)
+        dst = Path.join(dest_dir, file)
+        File.cp!(src, dst)
+        Mix.shell().info([:green, "* creating ", :reset, Path.relative_to_cwd(dst)])
+      end)
 
-    dest_dir =
-      Path.join([File.cwd!(), "priv", "migrations", "puedo_ecto"])
+      Mix.shell().info("""
 
-    File.mkdir_p!(dest_dir)
+      Migrations copied to #{Path.relative_to_cwd(dest_dir)}.
 
-    source_dir
-    |> File.ls!()
-    |> Enum.each(fn file ->
-      src = Path.join(source_dir, file)
-      dst = Path.join(dest_dir, file)
-      File.cp!(src, dst)
-      Mix.shell().info([:green, "* creating ", :reset, Path.relative_to_cwd(dst)])
-    end)
+      Run the following to apply them:
 
-    Mix.shell().info("""
-
-    Migrations copied to #{Path.relative_to_cwd(dest_dir)}.
-
-    Run the following to apply them:
-
-        mix ecto.migrate --repo #{repo_name}
-    """)
+          mix ecto.migrate --repo MyApp.Repo
+      """)
+    end
   end
 end
