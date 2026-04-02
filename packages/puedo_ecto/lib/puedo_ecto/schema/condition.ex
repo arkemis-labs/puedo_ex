@@ -2,13 +2,12 @@ defmodule PuedoEcto.Schema.Condition do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   @primary_key {:name, :string, autogenerate: false}
   schema "puedo_conditions" do
-    field :op, Ecto.Enum, values: [:eq, :gt, :lt, :gte, :lte, :in, :and, :or, :not]
-    field :field, :string
-    field :value, :map
-    field :rules, {:array, :map}
+    field(:op, Ecto.Enum, values: [:eq, :gt, :lt, :gte, :lte, :in, :and, :or, :not])
+    field(:field, :string)
+    field(:value, :map)
+    field(:rules, {:array, :map})
     timestamps()
   end
 

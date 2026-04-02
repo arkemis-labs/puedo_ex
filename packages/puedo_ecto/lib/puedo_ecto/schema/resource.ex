@@ -4,8 +4,8 @@ defmodule PuedoEcto.Schema.Resource do
 
   @primary_key {:id, :string, autogenerate: false}
   schema "puedo_resources" do
-    field :actions, {:array, :string}, default: []
-    field :relations, {:array, :string}, default: []
+    field(:actions, {:array, :string}, default: [])
+    field(:relations, {:array, :string}, default: [])
     timestamps()
   end
 

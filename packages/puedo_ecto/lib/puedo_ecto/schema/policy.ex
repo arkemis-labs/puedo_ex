@@ -2,13 +2,12 @@ defmodule PuedoEcto.Schema.Policy do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   @primary_key {:id, :string, autogenerate: false}
   schema "puedo_policies" do
-    field :role, :string
-    field :resource, :string
-    field :actions, {:array, :string}, default: []
-    field :condition, :string
+    field(:role, :string)
+    field(:resource, :string)
+    field(:actions, {:array, :string}, default: [])
+    field(:condition, :string)
     timestamps()
   end
 

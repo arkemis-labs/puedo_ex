@@ -16,8 +16,11 @@ defmodule PuedoEcto.Backend do
   @impl true
   def init(opts) do
     case Keyword.fetch(opts, :repo) do
-      {:ok, repo} -> {:ok, %{repo: repo, roles: %{}, resources: %{}, policies: %{}, conditions: %{}}}
-      :error -> {:error, :missing_repo}
+      {:ok, repo} ->
+        {:ok, %{repo: repo, roles: %{}, resources: %{}, policies: %{}, conditions: %{}}}
+
+      :error ->
+        {:error, :missing_repo}
     end
   end
 
@@ -63,7 +66,8 @@ defmodule PuedoEcto.Backend do
   @impl true
   def put_role(%{repo: repo} = state, %Role{} = role) do
     attrs = %{id: role.id, inherits: role.inherits}
-     case handle_put(repo,Schema.Role,attrs, :id) do
+
+    case handle_put(repo, Schema.Role, attrs, :id) do
       {:ok, _} -> {:ok, put_in(state, [:roles, role.id], role)}
       {:error, _} = err -> err
     end
@@ -72,7 +76,8 @@ defmodule PuedoEcto.Backend do
   @impl true
   def put_resource(%{repo: repo} = state, %Resource{} = resource) do
     attrs = %{id: resource.id, actions: resource.actions, relations: resource.relations}
-    case handle_put(repo,Schema.Resource,attrs, :id) do
+
+    case handle_put(repo, Schema.Resource, attrs, :id) do
       {:ok, _} -> {:ok, put_in(state, [:resources, resource.id], resource)}
       {:error, _} = err -> err
     end
@@ -88,7 +93,7 @@ defmodule PuedoEcto.Backend do
       condition: policy.condition
     }
 
-   case handle_put(repo,Schema.Policy,attrs, :id) do
+    case handle_put(repo, Schema.Policy, attrs, :id) do
       {:ok, _} -> {:ok, put_in(state, [:policies, policy.id], policy)}
       {:error, _} = err -> err
     end
@@ -97,7 +102,8 @@ defmodule PuedoEcto.Backend do
   @impl true
   def put_condition(%{repo: repo} = state, %Condition{} = condition) do
     attrs = condition_to_attrs(condition)
-    case handle_put(repo, Schema.Condition,attrs, :name) do
+
+    case handle_put(repo, Schema.Condition, attrs, :name) do
       {:ok, _} -> {:ok, put_in(state, [:conditions, condition.name], condition)}
       {:error, _} = err -> err
     end
@@ -105,25 +111,24 @@ defmodule PuedoEcto.Backend do
 
   @impl true
   def delete_role(%{repo: repo} = state, id) do
-     repo.delete_all(from p in Schema.Role, where: p.id == ^id)
-     {:ok, %{state | roles: Map.delete(state.roles, id)}}
-  rescue
-    e -> {:error, e}
-end
-
-  @impl true
-  def delete_policy(%{repo: repo} = state, id)do
-      repo.delete_all(from p in Schema.Policy, where: p.id == ^id)
-     {:ok, %{state | policies: Map.delete(state.policies, id)}}
+    repo.delete_all(from(p in Schema.Role, where: p.id == ^id))
+    {:ok, %{state | roles: Map.delete(state.roles, id)}}
   rescue
     e -> {:error, e}
   end
 
+  @impl true
+  def delete_policy(%{repo: repo} = state, id) do
+    repo.delete_all(from(p in Schema.Policy, where: p.id == ^id))
+    {:ok, %{state | policies: Map.delete(state.policies, id)}}
+  rescue
+    e -> {:error, e}
+  end
 
   @impl true
   def delete_condition(%{repo: repo} = state, name) do
-      repo.delete_all(from p in Schema.Condition, where: p.name == ^name)
-     {:ok, %{state | conditions: Map.delete(state.conditions, name)}}
+    repo.delete_all(from(p in Schema.Condition, where: p.name == ^name))
+    {:ok, %{state | conditions: Map.delete(state.conditions, name)}}
   rescue
     e -> {:error, e}
   end
@@ -133,7 +138,10 @@ end
   defp handle_put(repo, schema, attrs, conflict_target) do
     struct(schema)
     |> schema.changeset(attrs)
-    |> repo.insert(on_conflict: {:replace_all_except, [:inserted_at]}, conflict_target: conflict_target)
+    |> repo.insert(
+      on_conflict: {:replace_all_except, [:inserted_at]},
+      conflict_target: conflict_target
+    )
   end
 
   # --- Conversion helpers ---

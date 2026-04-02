@@ -96,7 +96,14 @@ defmodule PuedoEcto.BackendTest do
     end
 
     test "put then load returns the same policy", %{state: state} do
-      policy = %Policy{id: "p1", role: "admin", resource: "doc", actions: ["read"], condition: nil}
+      policy = %Policy{
+        id: "p1",
+        role: "admin",
+        resource: "doc",
+        actions: ["read"],
+        condition: nil
+      }
+
       {:ok, state} = Backend.put_policy(state, policy)
       assert {:ok, %Snapshot{policies: [loaded]}} = Backend.load_snapshot(state)
       assert loaded.id == "p1"

@@ -7,16 +7,28 @@ defmodule PuedoEcto.Schema.ConditionTest do
 
   @tag :this
   test "valid leaf condition" do
-      condition = %ConditionType{name: "check", op: :eq, field: "subject.role", value: "admin"}
-      context = %{subject: %{role: "admin"}, resource: %{}}
-      assert Condition.evaluate(condition, context)
+    condition = %ConditionType{name: "check", op: :eq, field: "subject.role", value: "admin"}
+    context = %{subject: %{role: "admin"}, resource: %{}}
+    assert Condition.evaluate(condition, context)
 
-    cs = ConditionSchema.changeset(%ConditionSchema{}, %{name: "is_owner", op: :eq, field: "owner_id"})
+    cs =
+      ConditionSchema.changeset(%ConditionSchema{}, %{
+        name: "is_owner",
+        op: :eq,
+        field: "owner_id"
+      })
+
     assert %{valid?: true} = cs
   end
 
   test "valid compound condition" do
-    cs = ConditionSchema.changeset(%ConditionSchema{}, %{name: "can_edit", op: :and, rules: [%{"name" => "x", "op" => "eq"}]})
+    cs =
+      ConditionSchema.changeset(%ConditionSchema{}, %{
+        name: "can_edit",
+        op: :and,
+        rules: [%{"name" => "x", "op" => "eq"}]
+      })
+
     assert %{valid?: true} = cs
   end
 

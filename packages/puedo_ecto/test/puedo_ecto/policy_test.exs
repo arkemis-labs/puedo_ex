@@ -15,7 +15,12 @@ defmodule PuedoEcto.Schema.PolicyTest do
   end
 
   test "valid with all crud actions" do
-    cs = Policy.changeset(%Policy{}, Map.put(@valid, :actions, ["create", "read", "update", "delete"]))
+    cs =
+      Policy.changeset(
+        %Policy{},
+        Map.put(@valid, :actions, ["create", "read", "update", "delete"])
+      )
+
     assert %{valid?: true} = cs
   end
 

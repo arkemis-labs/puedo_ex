@@ -4,7 +4,7 @@ defmodule PuedoEcto.Schema.Role do
 
   @primary_key {:id, :string, autogenerate: false}
   schema "puedo_roles" do
-    field :inherits, {:array, :string}, default: []
+    field(:inherits, {:array, :string}, default: [])
     timestamps()
   end
 
