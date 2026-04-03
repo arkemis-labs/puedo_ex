@@ -48,7 +48,7 @@ jobs:
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
-          args: --verbose --latest --strip header --include-path "${{ steps.meta.outputs.app_path }}/**/*"
+          args: --verbose --latest --strip header --include-path "${{ steps.parse-tag.outputs.app_path }}/**/*"
         env:
           GITHUB_REPO: ${{ github.repository }}
       - name: Create GitHub Release
@@ -59,7 +59,7 @@ jobs:
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
-          args: --verbose --include-path "${{ steps.meta.outputs.app_path }}/**/*"
+          args: --verbose --include-path "${{ steps.parse-tag.outputs.app_path }}/**/*"
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
