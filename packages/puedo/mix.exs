@@ -6,8 +6,12 @@ defmodule Puedo.MixProject do
       app: :puedo,
       version: "0.1.0",
       elixir: "~> 1.18",
+      description: "A flexible RBAC (Role-Based Access Control) engine for Elixir",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      package: package(),
+      source_url: "https://github.com/arkemis-labs/puedo_ex",
+      homepage_url: "https://github.com/arkemis-labs/puedo_ex",
       workspace: [
         tags: [{:scope, :package}]
       ],
@@ -31,7 +35,15 @@ defmodule Puedo.MixProject do
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
+  defp package do
+    [
+      licenses: ["Apache-2.0"],
+      links: %{
+        "GitHub" => "https://github.com/arkemis-labs/puedo_ex"
+      }
+    ]
+  end
+
   defp deps do
     [
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}

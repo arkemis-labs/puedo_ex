@@ -6,9 +6,13 @@ defmodule PuedoEcto.MixProject do
       app: :puedo_ecto,
       version: "0.0.1",
       elixir: "~> 1.18",
+      description: "Ecto persistence backend for Puedo RBAC engine",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
+      package: package(),
+      source_url: "https://github.com/arkemis-labs/puedo_ex",
+      homepage_url: "https://github.com/arkemis-labs/puedo_ex",
       workspace: [
         tags: [{:scope, :package}]
       ],
@@ -28,6 +32,15 @@ defmodule PuedoEcto.MixProject do
       commit_msg: "puedo_ecto@v%s",
       annotation: "tag release-%s",
       annotate: true
+    ]
+  end
+
+  defp package do
+    [
+      licenses: ["Apache-2.0"],
+      links: %{
+        "GitHub" => "https://github.com/arkemis-labs/puedo_ex"
+      }
     ]
   end
 
