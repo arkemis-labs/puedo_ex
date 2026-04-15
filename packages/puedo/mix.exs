@@ -4,7 +4,7 @@ defmodule Puedo.MixProject do
   def project do
     [
       app: :puedo,
-      version: "0.1.0",
+      version: "0.0.1",
       elixir: "~> 1.18",
       description: "A flexible RBAC (Role-Based Access Control) engine for Elixir",
       start_permanent: Mix.env() == :prod,
