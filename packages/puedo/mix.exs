@@ -17,8 +17,8 @@ defmodule Puedo.MixProject do
 
   defp versioning do
     [
-      tag_prefix: "puedo_ecto@v",
-      commit_msg: "puedo_ecto@v%s",
+      tag_prefix: "puedo@v",
+      commit_msg: "puedo@v%s",
       annotation: "tag release-%s",
       annotate: true
     ]
