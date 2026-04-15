@@ -34,17 +34,19 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache@v4
         with:
-          path: deps
+          path: ${{ steps.parse-tag.outputs.app_path }}/deps
           key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-
-      - name: Install dependencies
+          restore-keys: ${{ runner.os }}-mix-${{ steps.parse-tag.outputs.app }}
+      - name: Install root dependencies
         run: mix deps.get
-      - name: Compile dependencies
-        run: mix deps.compile
-      - name: Build package
-        run: mix hex.build
-      - name: Release & Publish
-        run: mix hex.publish --yes
+      - name: Install project dependencies
+        run: mix workspace.run -t deps.get -p ${{ steps.parse-tag.outputs.app }}
+      - name: Compile project dependencies
+        run: mix workspace.run -t deps.compile -p ${{ steps.parse-tag.outputs.app }}
+      - name: Build project package
+        run: mix workspace.run -t hex.build -p ${{ steps.parse-tag.outputs.app }}
+      - name: Release & Publish project
+        run: mix workspace.run -t hex.publish -p ${{ steps.parse-tag.outputs.app }} -- -yes
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
       - name: Generate release notes
