@@ -7,7 +7,7 @@ A pluggable authorization engine for Elixir. Policy-based RBAC with conditions.
 | Package | Description | Status |
 |---------|-------------|--------|
 | [`puedo`](packages/puedo) | Core library. Types, evaluator, condition engine, in-memory backend. | In progress |
-| `puedo_ecto` | Ecto/Postgres backend. | Planned |
+| `[puedo_ecto](packages/puedo_ecto)` | Ecto/Postgres backend. | In progress |
 | `puedo_phoenix` | Phoenix integration. Authorization plug, REST API. | Planned |
 
 ## Monorepo
