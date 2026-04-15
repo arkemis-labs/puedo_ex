@@ -8,13 +8,26 @@ defmodule PuedoEcto.MixProject do
       elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
-      deps: deps()
+      deps: deps(),
+      workspace: [
+        tags: [{:scope, :package}]
+      ],
+      versioning: versioning()
     ]
   end
 
   def application do
     [
       extra_applications: [:logger]
+    ]
+  end
+
+  defp versioning do
+    [
+      tag_prefix: "puedo_ecto@v",
+      commit_msg: "puedo_ecto@v%s",
+      annotation: "tag release-%s",
+      annotate: true
     ]
   end
 
