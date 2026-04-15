@@ -20,12 +20,12 @@ jobs:
         id: parse-tag
         run: |
           REF_NAME="${{ github.ref_name }}"
-          APP_NAME="${REF_NAME%@*}"
+          PACKAGE_NAME="${REF_NAME%@*}"
           VERSION="${REF_NAME#*@}"
-          APP_PATH="apps/${APP_NAME}"
-          echo "app=$APP_NAME" >> $GITHUB_OUTPUT
+          PACKAGE_PATH="packages/${PACKAGE_NAME}"
+          echo "package=$PACKAGE_NAME" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "app_path=$APP_PATH" >> $GITHUB_OUTPUT
+          echo "package_path=$PACKAGE_PATH" >> $GITHUB_OUTPUT
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
         with:
@@ -34,19 +34,19 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache@v4
         with:
-          path: ${{ steps.parse-tag.outputs.app_path }}/deps
+          path: ${{ steps.parse-tag.outputs.package_path }}/deps
           key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
-          restore-keys: ${{ runner.os }}-mix-${{ steps.parse-tag.outputs.app }}
+          restore-keys: ${{ runner.os }}-mix-${{ steps.parse-tag.outputs.package }}
       - name: Install root dependencies
         run: mix deps.get
       - name: Install project dependencies
-        run: mix workspace.run -t deps.get -p ${{ steps.parse-tag.outputs.app }}
+        run: mix workspace.run -t deps.get -p ${{ steps.parse-tag.outputs.package }}
       - name: Compile project dependencies
-        run: mix workspace.run -t deps.compile -p ${{ steps.parse-tag.outputs.app }}
+        run: mix workspace.run -t deps.compile -p ${{ steps.parse-tag.outputs.package }}
       - name: Build project package
-        run: mix workspace.run -t hex.build -p ${{ steps.parse-tag.outputs.app }}
+        run: mix workspace.run -t hex.build -p ${{ steps.parse-tag.outputs.package }}
       - name: Release & Publish project
-        run: mix workspace.run -t hex.publish -p ${{ steps.parse-tag.outputs.app }} -- -yes
+        run: mix workspace.run -t hex.publish -p ${{ steps.parse-tag.outputs.package }} -- --yes
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
       - name: Generate release notes
@@ -54,7 +54,7 @@ jobs:
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
-          args: --verbose --latest --strip header --include-path "${{ steps.parse-tag.outputs.app_path }}/**/*"
+          args: --verbose --latest --strip header --include-path "${{ steps.parse-tag.outputs.package_path }}/**/*"
         env:
           GITHUB_REPO: ${{ github.repository }}
       - name: Create GitHub Release
@@ -65,7 +65,7 @@ jobs:
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
-          args: --verbose --include-path "${{ steps.parse-tag.outputs.app_path }}/**/*"
+          args: --verbose --include-path "${{ steps.parse-tag.outputs.package_path }}/**/*"
         env:
           OUTPUT: CHANGELOG.md
           GITHUB_REPO: ${{ github.repository }}
