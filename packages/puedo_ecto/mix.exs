@@ -54,7 +54,8 @@ defmodule PuedoEcto.MixProject do
       {:ecto_sql, "~> 3.13"},
 
       # Optional
-      {:postgrex, "~> 0.22.0", optional: true}
+      {:postgrex, "~> 0.22.0", optional: true},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 end
