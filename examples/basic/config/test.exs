@@ -1,13 +1,17 @@
 import Config
 
-config :puedo_phoenix, PuedoPhoenix.TestEndpoint,
+# We don't run a server during test. If one is required,
+# you can enable the server option below.
+config :basic, BasicWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "ajYn4AZ0Nl+n/Ke4s2XHjVlVk7RzywRJgrlJkykIOal6Y4bMA/PH8uoxwYFy4YFO",
-  server: false,
-  render_errors: [
-    formats: [json: PuedoPhoenix.ErrorJSON],
-    layout: false
-  ]
+  secret_key_base: "6S01JEYK4lX28kz+uDW/AGChx1cIeSbd6O4KGN7h1dKNe4XWoprZo6icbvSxmTxh",
+  server: false
+
+# In test we don't send emails
+config :basic, Basic.Mailer, adapter: Swoosh.Adapters.Test
+
+# Disable swoosh api client as it is only required for production adapters
+config :swoosh, :api_client, false
 
 # Print only warnings and errors during test
 config :logger, level: :warning

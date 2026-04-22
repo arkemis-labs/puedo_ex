@@ -8,6 +8,6 @@ defmodule PuedoPhoenix.TestRouter do
 
   scope "/" do
     pipe_through :puedo_api
-    puedo_dashboard "/", dashboard: false
+    puedo "/"
   end
 end

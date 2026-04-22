@@ -1,7 +1,7 @@
 defmodule PuedoPhoenix.Router do
-  defmacro puedo_dashboard(path, opts \\ []) do
+  defmacro puedo(path, opts \\ []) do
     quote bind_quoted: [path: path, opts: opts] do
-      dashboard? = Keyword.get(opts, :dashboard, true)
+      dashboard? = Keyword.get(opts, :dashboard, false)
       login? = Keyword.get(opts, :login, false)
 
       if dashboard? do
@@ -23,14 +23,21 @@ defmodule PuedoPhoenix.Router do
         end
       end
 
-      scope path <> "/api", PuedoPhoenix, as: :puedo_api do
-        get "/snapshot", SnapshotController, :show
-        get "/version", SnapshotController, :version
+      scope path <> "/api", alias: false, as: :puedo_api do
+        get "/snapshot", PuedoPhoenix.SnapshotController, :show
+        get "/version", PuedoPhoenix.SnapshotController, :version
 
-        resources "/roles", RoleController, only: [:index, :create, :delete]
-        resources "/policies", PolicyController, only: [:index, :create, :delete]
-        resources "/conditions", ConditionController, only: [:index, :create, :delete]
-        resources "/resources", ResourceController, only: [:index, :create, :delete]
+        resources "/roles", PuedoPhoenix.RoleController,
+          only: [:index, :create, :delete]
+
+        resources "/policies", PuedoPhoenix.PolicyController,
+          only: [:index, :create, :delete]
+
+        resources "/conditions", PuedoPhoenix.ConditionController,
+          only: [:index, :create, :delete]
+
+        resources "/resources", PuedoPhoenix.ResourceController,
+          only: [:index, :create, :delete]
       end
     end
   end
