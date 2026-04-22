@@ -1,18 +1,34 @@
 defmodule PuedoPhoenix do
-  @moduledoc """
-  Documentation for `PuedoPhoenix`.
-  """
+  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
-  @doc """
-  Hello world.
+  def live_view do
+    quote do
+      use Phoenix.LiveView
+      use Gettext, backend: PuedoPhoenix.Gettext
 
-  ## Examples
+      import Phoenix.HTML
+      import PuedoPhoenix.CoreComponents
 
-      iex> PuedoPhoenix.hello()
-      :world
+      alias Phoenix.LiveView.JS
+      alias PuedoPhoenix.Layouts
 
-  """
-  def hello do
-    :world
+      use Phoenix.VerifiedRoutes,
+        endpoint: Application.compile_env(:puedo_phoenix, :endpoint),
+        router: Application.compile_env(:puedo_phoenix, :router),
+        statics: PuedoPhoenix.static_paths()
+    end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: Application.compile_env(:puedo_phoenix, :endpoint),
+        router: Application.compile_env(:puedo_phoenix, :router),
+        statics: PuedoPhoenix.static_paths()
+    end
+  end
+
+  defmacro __using__(which) when is_atom(which) do
+    apply(__MODULE__, which, [])
   end
 end
