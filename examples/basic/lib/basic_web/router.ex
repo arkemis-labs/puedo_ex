@@ -21,8 +21,13 @@ defmodule BasicWeb.Router do
   end
 
   scope "/" do
+    pipe_through :browser
+    puedo_dashboard("/puedo")
+  end
+
+  scope "/" do
     pipe_through :api
-    puedo("/puedo")
+    puedo_api("/puedo")
   end
 
   # Other scopes may use custom stacks.

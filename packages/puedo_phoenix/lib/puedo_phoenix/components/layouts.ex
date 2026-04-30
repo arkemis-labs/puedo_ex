@@ -6,26 +6,27 @@ defmodule PuedoPhoenix.Layouts do
   import PuedoPhoenix.CoreComponents
 
   alias Phoenix.LiveView.JS
+  alias PuedoPhoenix.LayoutComponents
 
   embed_templates "layouts/*"
 
   attr :flash, :map, required: true, doc: "the map of flash messages"
   attr :current_scope, :map, default: nil
+  attr :current_path, :string, default: nil
+  attr :puedo_prefix, :string, default: ""
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <span class="text-sm font-semibold">Puedo Admin</span>
-      </div>
-    </header>
+    <div class="flex min-h-screen">
+      <LayoutComponents.sidebar prefix={@puedo_prefix} current_path={@current_path} />
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl space-y-4">
-        {render_slot(@inner_block)}
+      <div class="flex-1 flex flex-col">
+        <main class="px-4 py-8 sm:px-6 lg:px-8">
+          {render_slot(@inner_block)}
+        </main>
       </div>
-    </main>
+    </div>
 
     <.flash_group flash={@flash} />
     """
@@ -65,5 +66,16 @@ defmodule PuedoPhoenix.Layouts do
       </.flash>
     </div>
     """
+  end
+
+  defp asset_path(conn, asset) when asset in [:css, :js] do
+    hash = PuedoPhoenix.Assets.current_hash(asset)
+    prefix = conn.private.phoenix_router.__puedo_prefix__()
+
+    Phoenix.VerifiedRoutes.unverified_path(
+      conn,
+      conn.private.phoenix_router,
+      "#{prefix}/#{asset}-#{hash}"
+    )
   end
 end

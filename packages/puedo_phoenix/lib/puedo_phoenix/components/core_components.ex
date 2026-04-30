@@ -261,7 +261,7 @@ defmodule PuedoPhoenix.CoreComponents do
       end
 
     ~H"""
-    <table class="table table-zebra">
+    <table class="table">
       <thead>
         <tr>
           <th :for={col <- @col}>{col[:label]}</th>
@@ -307,6 +307,85 @@ defmodule PuedoPhoenix.CoreComponents do
       </li>
     </ul>
     """
+  end
+
+  attr :id, :string, required: true
+  attr :show, :boolean, default: false
+  attr :patch, :string, default: nil
+  attr :navigate, :string, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  slot :inner_block, required: true
+
+  def modal(assigns) do
+    ~H"""
+    <div
+      id={@id}
+      class="fixed z-50 inset-0 hidden"
+      phx-mounted={@show && show_modal(@id)}
+      phx-remove={hide_modal(@id)}
+      data-cancel={modal_on_cancel(@patch, @navigate)}
+      {@rest}
+    >
+      <div id={"#{@id}-container"} class="h-screen flex items-center justify-center p-4">
+        <div class="absolute z-0 inset-0 bg-black/50" aria-hidden="true"></div>
+        <.focus_wrap
+          id={"#{@id}-content"}
+          class={[
+            "relative max-h-full overflow-y-auto bg-base-100 text-base-content rounded-box shadow-xl",
+            "w-full p-6 max-w-4xl",
+            @class
+          ]}
+          role="dialog"
+          aria-modal="true"
+          tabindex="0"
+          phx-window-keydown={JS.exec("data-cancel", to: "##{@id}")}
+          phx-click-away={JS.exec("data-cancel", to: "##{@id}")}
+          phx-key="escape"
+        >
+          <button
+            type="button"
+            class="absolute top-6 right-6 text-base-content/60 hover:text-base-content flex space-x-1 items-center"
+            aria-label="close modal"
+            phx-click={JS.exec("data-cancel", to: "##{@id}")}
+          >
+            <.icon name="hero-x-mark" class="text-2xl" />
+          </button>
+          {render_slot(@inner_block)}
+        </.focus_wrap>
+      </div>
+    </div>
+    """
+  end
+
+  defp modal_on_cancel(nil, nil), do: JS.exec("phx-remove")
+  defp modal_on_cancel(nil, navigate), do: JS.patch(navigate)
+  defp modal_on_cancel(patch, nil), do: JS.patch(patch)
+
+  @doc """
+  Shows a modal rendered with `modal/1`.
+  """
+  def show_modal(js \\ %JS{}, id) do
+    js
+    |> JS.show(to: "##{id}")
+    |> JS.focus_first(to: "##{id}-content")
+    |> JS.transition(
+      {"ease-out duration-200", "opacity-0", "opacity-100"},
+      to: "##{id}-container"
+    )
+  end
+
+  @doc """
+  Hides a modal rendered with `modal/1`.
+  """
+  def hide_modal(js \\ %JS{}, id) do
+    js
+    |> JS.transition(
+      {"ease-in duration-200", "opacity-100", "opacity-0"},
+      to: "##{id}-container"
+    )
+    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
   end
 
   attr :name, :string, required: true
