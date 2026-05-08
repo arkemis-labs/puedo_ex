@@ -2,11 +2,11 @@ defmodule PuedoPhoenix.Assets do
   @moduledoc false
   import Plug.Conn
 
-  css_path = Path.join(__DIR__, "../../assets/css/app.css")
+  css_path = Path.join(__DIR__, "../../priv/static/assets/css/app.css")
   @external_resource css_path
   @css File.read!(css_path)
 
-  js_path = Path.join(__DIR__, "../../assets/js/app.js")
+  js_path = Path.join(__DIR__, "../../priv/static/assets/js/app.js")
   @external_resource js_path
   @js File.read!(js_path)
 
