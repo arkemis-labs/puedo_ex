@@ -10,6 +10,9 @@ defmodule PuedoPhoenix.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      workspace: [
+        tags: [{:scope, :package}]
+      ],
       compilers: [:phoenix_live_view] ++ Mix.compilers()
     ]
   end
