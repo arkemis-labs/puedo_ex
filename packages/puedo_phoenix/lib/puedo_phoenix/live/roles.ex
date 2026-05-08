@@ -2,6 +2,7 @@ defmodule PuedoPhoenix.RolesLive do
   use PuedoPhoenix, :live_view
   alias Puedo.Types.Role
 
+  @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -11,6 +12,7 @@ defmodule PuedoPhoenix.RolesLive do
     {:ok, socket}
   end
 
+  @impl true
   def handle_params(_params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action)}
   end

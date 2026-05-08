@@ -2,6 +2,7 @@ defmodule PuedoPhoenix.PoliciesLive do
   use PuedoPhoenix, :live_view
   alias Puedo.Types.Policy
 
+  @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -20,6 +21,7 @@ defmodule PuedoPhoenix.PoliciesLive do
     {:ok, socket}
   end
 
+  @impl true
   def handle_params(_params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action)}
   end
