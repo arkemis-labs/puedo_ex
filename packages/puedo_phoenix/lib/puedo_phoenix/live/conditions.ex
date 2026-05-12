@@ -2,7 +2,7 @@ defmodule PuedoPhoenix.ConditionsLive do
   use PuedoPhoenix, :live_view
   alias Puedo.Types.Condition
 
- @impl true
+  @impl true
   def mount(_params, _session, socket) do
     socket =
       socket
@@ -10,6 +10,7 @@ defmodule PuedoPhoenix.ConditionsLive do
       |> stream(:conditions, Puedo.list_conditions())
       |> assign(:form, empty_form())
       |> assign(:available_conditions, condition_options())
+      |> assign(:selected_rules, [])
 
     {:ok, socket}
   end
@@ -22,7 +23,9 @@ defmodule PuedoPhoenix.ConditionsLive do
   defp apply_action(socket, :index), do: socket
 
   defp apply_action(socket, :new) do
-    assign(socket, :form, empty_form())
+    socket
+    |> assign(:form, empty_form())
+    |> assign(:selected_rules, [])
   end
 
   @impl true
@@ -62,9 +65,9 @@ defmodule PuedoPhoenix.ConditionsLive do
              id="rules-select"
              label="Rules"
              input_name="condition[rules]"
-             placeholder={if @available_conditions == [], do: "No conditions yet — create some first.", else: "Select rules..."}
+             placeholder="Select rules..."
              options={@available_conditions}
-             disabled={@available_conditions == []}
+             on_change={:rules_changed}
            />
            <div class="modal-action">
              <.button type="button" patch={@puedo_prefix <> "/conditions"}>Cancel</.button>
@@ -92,9 +95,7 @@ defmodule PuedoPhoenix.ConditionsLive do
 
   @impl true
   def handle_event("create", %{"condition" => params}, socket) do
-
-    rules = Map.get(params, "rules", [])
-    rules = if is_list(rules), do: rules, else: []
+    rules = socket.assigns.selected_rules
 
     condition =
       params
@@ -112,6 +113,7 @@ defmodule PuedoPhoenix.ConditionsLive do
          socket
          |> stream_insert(:conditions, condition, at: 0)
          |> assign(:available_conditions, condition_options())
+         |> assign(:selected_rules, [])
          |> put_flash(:info, "Condition #{condition.name} created")
          |> push_patch(to: socket.assigns.puedo_prefix <> "/conditions")}
 
@@ -121,6 +123,11 @@ defmodule PuedoPhoenix.ConditionsLive do
          |> assign(:form, to_form(params, as: "condition"))
          |> put_flash(:error, "Create failed: #{inspect(reason)}")}
     end
+  end
+
+  @impl true
+  def handle_info({:rules_changed, rules}, socket) do
+    {:noreply, assign(socket, :selected_rules, rules)}
   end
 
   defp empty_form(), do:
