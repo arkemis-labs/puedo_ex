@@ -31,6 +31,15 @@ defmodule Puedo do
   @spec delete_condition(String.t()) :: :ok | {:error, term()}
   def delete_condition(name), do: Store.delete_condition(@store, name)
 
+  @spec get_role(String.t()) :: Role.t() | nil
+  def get_role(id), do: Store.get_role(@store, id)
+
+  @spec get_resource(String.t()) :: Resource.t() | nil
+  def get_resource(id), do: Store.get_resource(@store, id)
+
+  @spec get_condition(String.t()) :: Condition.t() | nil
+  def get_condition(name), do: Store.get_condition(@store, name)
+
   @spec list_roles() :: [Role.t()]
   def list_roles, do: Store.list_roles(@store)
 

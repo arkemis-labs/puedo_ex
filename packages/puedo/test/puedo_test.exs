@@ -57,6 +57,24 @@ defmodule PuedoTest do
       assert :ok = Puedo.delete_condition("is_owner")
       assert Puedo.list_conditions() == []
     end
+
+    test "get_role returns the role or nil" do
+      assert Puedo.get_role("admin") == nil
+      :ok = Puedo.put_role(%Role{id: "admin"})
+      assert %Role{id: "admin"} = Puedo.get_role("admin")
+    end
+
+    test "get_resource returns the resource or nil" do
+      assert Puedo.get_resource("post") == nil
+      :ok = Puedo.put_resource(%Resource{id: "post", actions: ["read", "write"]})
+      assert %Resource{id: "post"} = Puedo.get_resource("post")
+    end
+
+    test "get_condition returns the condition or nil" do
+      assert Puedo.get_condition("is_owner") == nil
+      :ok = Puedo.put_condition(%Condition{name: "is_owner", op: :eq, field: "subject.id", value: "me"})
+      assert %Condition{name: "is_owner"} = Puedo.get_condition("is_owner")
+    end
   end
 
   describe "can?/3" do
