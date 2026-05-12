@@ -62,7 +62,7 @@ defmodule PuedoPhoenix.Components.MultiSelect do
           class="hidden border border-base-300 bg-base-100 rounded-b-lg shadow-md -mt-1 flex flex-col gap-2"
           phx-click-away={JS.hide(to: "##{@id}-popover")}
         >
-          <div class="p-2 pb-0 pt-3 shrink-0">
+          <div class="p-2 pt-3 shrink-0">
             <input
               type="text"
               class="input input-sm w-full"

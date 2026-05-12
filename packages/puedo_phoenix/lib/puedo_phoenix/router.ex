@@ -18,6 +18,7 @@ defmodule PuedoPhoenix.Router do
             live "/policies/new", PuedoPhoenix.PoliciesLive, :new
             live "/conditions", PuedoPhoenix.ConditionsLive, :index
             live "/conditions/new", PuedoPhoenix.ConditionsLive, :new
+            live "/conditions/:name/edit", PuedoPhoenix.ConditionsLive, :edit
             live "/resources", PuedoPhoenix.ResourcesLive, :index
             live "/resources/new", PuedoPhoenix.ResourcesLive, :new
             live "/tester", PuedoPhoenix.TesterLive, :index

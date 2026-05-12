@@ -16,16 +16,43 @@ defmodule PuedoPhoenix.ConditionsLive do
   end
 
   @impl true
-  def handle_params(_params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action)}
+  def handle_params(params, _url, socket) do
+    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :index), do: socket
+  defp apply_action(socket, :index, _params), do: socket
 
-  defp apply_action(socket, :new) do
+  defp apply_action(socket, :new, _params) do
     socket
     |> assign(:form, empty_form())
     |> assign(:selected_rules, [])
+  end
+
+  defp apply_action(socket, :edit, %{"name" => name}) do
+    condition = Enum.find(Puedo.list_conditions(), &(&1.name == name))
+
+    form =
+      to_form(
+        %{
+          "name" => condition.name,
+          "op" => to_string(condition.op),
+          "field" => condition.field || "",
+          "value" => condition.value || "",
+          "rules" => condition.rules
+        },
+        as: "condition"
+      )
+
+    selected = Map.new(condition.rules, &{&1, &1})
+
+    available = condition_options() |> Enum.reject(fn {_label, value} -> value == name end)
+
+    socket
+    |> assign(:form, form)
+    |> assign(:selected_rules, condition.rules)
+    |> assign(:available_conditions, available)
+    |> assign(:editing_condition, condition)
+    |> send_update_selected(selected)
   end
 
   @impl true
@@ -46,15 +73,19 @@ defmodule PuedoPhoenix.ConditionsLive do
          <:col :let={{_id, condition}} label="Value">{condition.value}</:col>
          <:col :let={{_id, condition}} label="Rules">{Enum.join(condition.rules, ", ")}</:col>
          <:action :let={{_id, condition}}>
-           <.button phx-click="delete" phx-value-id={condition.name}>
+           <.button patch={@puedo_prefix <> "/conditions/#{condition.name}/edit"} variant="primary">
+             Edit
+           </.button>
+           <.button phx-click="delete" phx-value-name={condition.name}>
              Delete
            </.button>
          </:action>
        </.table>
-       <.modal :if={@live_action == :new} id="condition-modal" show patch={@puedo_prefix <> "/conditions"}>
-         <h3 class="text-lg font-bold">New condition</h3>
-         <.form for={@form} phx-submit="create" class="space-y-4 mt-4">
-           <.input field={@form[:name]} label="Name" placeholder="my-condition" />
+       <.modal :if={@live_action in [:new, :edit]} id="condition-modal" show patch={@puedo_prefix <> "/conditions"}>
+         <h3 class="text-lg font-bold">{if @live_action == :new, do: "New condition", else: "Edit condition"}</h3>
+         <.form for={@form} phx-submit="save" class="space-y-4 mt-4">
+           <input :if={@live_action == :edit} type="hidden" name="condition[original_name]" value={@form[:name].value} />
+           <.input field={@form[:name]} label="Name" placeholder="my-condition" disabled={@live_action == :edit} required={true} />
            <.input type="select" field={@form[:op]}
              multiple={false} label="Operation"
              options={available_operations()} />
@@ -71,7 +102,7 @@ defmodule PuedoPhoenix.ConditionsLive do
            />
            <div class="modal-action">
              <.button type="button" patch={@puedo_prefix <> "/conditions"}>Cancel</.button>
-             <.button type="submit" variant="primary">Create</.button>
+             <.button type="submit" variant="primary">{if @live_action == :new, do: "Create", else: "Update"}</.button>
            </div>
          </.form>
        </.modal>
@@ -94,12 +125,22 @@ defmodule PuedoPhoenix.ConditionsLive do
   end
 
   @impl true
-  def handle_event("create", %{"condition" => params}, socket) do
+  def handle_event("save", %{"condition" => params}, socket) do
     rules = socket.assigns.selected_rules
 
+    name =
+      if socket.assigns.live_action == :edit,
+        do: params["original_name"] || params["name"],
+        else: params["name"]
+
     condition =
-      params
-      |> Map.put("rules", rules)
+      %{
+        "name" => name,
+        "op" => params["op"],
+        "field" => params["field"],
+        "value" => params["value"],
+        "rules" => rules
+      }
       |> Enum.into(%{}, fn
         {"op", v} -> {:op, String.to_existing_atom(v)}
         {"rules", v} -> {:rules, v}
@@ -109,19 +150,21 @@ defmodule PuedoPhoenix.ConditionsLive do
 
     case Puedo.put_condition(condition) do
       :ok ->
+        verb = if socket.assigns.live_action == :new, do: "created", else: "updated"
+
         {:noreply,
          socket
          |> stream_insert(:conditions, condition, at: 0)
          |> assign(:available_conditions, condition_options())
          |> assign(:selected_rules, [])
-         |> put_flash(:info, "Condition #{condition.name} created")
+         |> put_flash(:info, "Condition #{condition.name} #{verb}")
          |> push_patch(to: socket.assigns.puedo_prefix <> "/conditions")}
 
       {:error, reason} ->
         {:noreply,
          socket
          |> assign(:form, to_form(params, as: "condition"))
-         |> put_flash(:error, "Create failed: #{inspect(reason)}")}
+         |> put_flash(:error, "Save failed: #{inspect(reason)}")}
     end
   end
 
@@ -130,10 +173,15 @@ defmodule PuedoPhoenix.ConditionsLive do
     {:noreply, assign(socket, :selected_rules, rules)}
   end
 
+  defp send_update_selected(socket, selected) do
+    send_update(PuedoPhoenix.Components.MultiSelect, id: "rules-select", selected: selected)
+    socket
+  end
+
   defp empty_form(), do:
     to_form(%{"name" => "", "op" => "", "field" => "", "value" => "", "rules" => []}, as: "condition")
 
-  defp condition_options do
+  defp condition_options(params \\ %{}) do
     Puedo.list_conditions() |> Enum.map(&{&1.name, &1.name})
   end
 
