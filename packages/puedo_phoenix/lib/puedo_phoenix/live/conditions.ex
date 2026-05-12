@@ -29,7 +29,7 @@ defmodule PuedoPhoenix.ConditionsLive do
   end
 
   defp apply_action(socket, :edit, %{"name" => name}) do
-    condition = Enum.find(Puedo.list_conditions(), &(&1.name == name))
+    condition = Puedo.get_condition(name)
 
     form =
       to_form(
@@ -181,7 +181,7 @@ defmodule PuedoPhoenix.ConditionsLive do
   defp empty_form(), do:
     to_form(%{"name" => "", "op" => "", "field" => "", "value" => "", "rules" => []}, as: "condition")
 
-  defp condition_options(params \\ %{}) do
+  defp condition_options() do
     Puedo.list_conditions() |> Enum.map(&{&1.name, &1.name})
   end
 
