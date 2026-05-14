@@ -70,6 +70,13 @@ defmodule PuedoTest do
       assert %Resource{id: "post"} = Puedo.get_resource("post")
     end
 
+    test "get_policy returns the policy or nil" do
+      assert Puedo.get_policy("pol_1") == nil
+      policy = %Policy{id: "pol_1", role: "admin", resource: "post", actions: ["read"]}
+      :ok = Puedo.put_policy(policy)
+      assert %Policy{id: "pol_1"} = Puedo.get_policy("pol_1")
+    end
+
     test "get_condition returns the condition or nil" do
       assert Puedo.get_condition("is_owner") == nil
       :ok = Puedo.put_condition(%Condition{name: "is_owner", op: :eq, field: "subject.id", value: "me"})

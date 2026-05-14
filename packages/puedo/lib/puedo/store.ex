@@ -60,6 +60,11 @@ defmodule Puedo.Store do
     GenServer.call(server, {:get_resource, id})
   end
 
+  @spec get_policy(GenServer.server(), String.t()) :: Policy.t() | nil
+  def get_policy(server, id) do
+    GenServer.call(server, {:get_policy, id})
+  end
+
   @spec get_condition(GenServer.server(), String.t()) :: Condition.t() | nil
   def get_condition(server, name) do
     GenServer.call(server, {:get_condition, name})
@@ -171,6 +176,11 @@ defmodule Puedo.Store do
   @impl true
   def handle_call({:get_resource, id}, _from, state) do
     {:reply, ets_lookup(state.table, {:resource, id}), state}
+  end
+
+  @impl true
+  def handle_call({:get_policy, id}, _from, state) do
+    {:reply, ets_lookup(state.table, {:policy, id}), state}
   end
 
   @impl true
