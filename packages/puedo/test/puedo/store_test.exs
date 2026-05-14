@@ -102,6 +102,17 @@ defmodule Puedo.StoreTest do
     end
   end
 
+  describe "delete_resource/2" do
+    test "removes a resource and increments version", %{store: store} do
+      :ok = Store.put_resource(store, %Resource{id: "post", actions: ["read"]})
+      assert :ok = Store.delete_resource(store, "post")
+
+      snapshot = Store.snapshot(store)
+      assert snapshot.resources == %{}
+      assert snapshot.version == 2
+    end
+  end
+
   describe "delete_condition/2" do
     test "removes a condition and increments version", %{store: store} do
       :ok = Store.put_condition(store, %Condition{name: "is_owner", op: :eq, field: "subject.id", value: "me"})

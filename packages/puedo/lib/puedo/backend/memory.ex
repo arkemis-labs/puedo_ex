@@ -53,4 +53,9 @@ defmodule Puedo.Backend.Memory do
   def delete_condition(state, name) do
     {:ok, %{state | conditions: Map.delete(state.conditions, name)}}
   end
+  
+  @impl true
+  def delete_resource(state, name) do
+    {:ok, %{state | resources: Map.delete(state.resources, name)}}
+  end
 end

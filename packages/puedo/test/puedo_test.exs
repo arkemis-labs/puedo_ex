@@ -52,6 +52,12 @@ defmodule PuedoTest do
       assert Puedo.list_policies() == []
     end
 
+    test "delete resource" do
+      :ok = Puedo.put_resource(%Resource{id: "post", actions: ["read"]})
+      assert :ok = Puedo.delete_resource("post")
+      assert Puedo.list_resources() == []
+    end
+
     test "delete condition" do
       :ok = Puedo.put_condition(%Condition{name: "is_owner", op: :eq, field: "subject.id", value: "me"})
       assert :ok = Puedo.delete_condition("is_owner")

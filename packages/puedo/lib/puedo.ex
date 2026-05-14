@@ -28,6 +28,9 @@ defmodule Puedo do
   @spec delete_policy(String.t()) :: :ok | {:error, term()}
   def delete_policy(id), do: Store.delete_policy(@store, id)
 
+  @spec delete_resource(String.t()) :: :ok | {:error, term()}
+  def delete_resource(id), do: Store.delete_resource(@store, id)
+
   @spec delete_condition(String.t()) :: :ok | {:error, term()}
   def delete_condition(name), do: Store.delete_condition(@store, name)
 
