@@ -15,39 +15,13 @@ defmodule Puedo.Store do
     GenServer.start_link(__MODULE__, opts, name: name)
   end
 
-  @spec put_role(GenServer.server(), Role.t()) :: :ok | {:error, term()}
-  def put_role(server, role) do
-    GenServer.call(server, {:put_role, role})
-  end
+  ########################################################################
+  ################################# ROLE #################################
+  ########################################################################
 
-  @spec put_resource(GenServer.server(), Resource.t()) :: :ok | {:error, term()}
-  def put_resource(server, resource) do
-    GenServer.call(server, {:put_resource, resource})
-  end
-
-  @spec put_policy(GenServer.server(), Policy.t()) :: :ok | {:error, term()}
-  def put_policy(server, policy) do
-    GenServer.call(server, {:put_policy, policy})
-  end
-
-  @spec put_condition(GenServer.server(), Condition.t()) :: :ok | {:error, term()}
-  def put_condition(server, condition) do
-    GenServer.call(server, {:put_condition, condition})
-  end
-
-  @spec delete_role(GenServer.server(), String.t()) :: :ok | {:error, term()}
-  def delete_role(server, role_id) do
-    GenServer.call(server, {:delete_role, role_id})
-  end
-
-  @spec delete_policy(GenServer.server(), String.t()) :: :ok | {:error, term()}
-  def delete_policy(server, policy_id) do
-    GenServer.call(server, {:delete_policy, policy_id})
-  end
-
-  @spec delete_condition(GenServer.server(), String.t()) :: :ok | {:error, term()}
-  def delete_condition(server, condition_id) do
-    GenServer.call(server, {:delete_condition, condition_id})
+  @spec list_roles(GenServer.server()) :: [Role.t()]
+  def list_roles(server) do
+    GenServer.call(server, {:list_roles})
   end
 
   @spec get_role(GenServer.server(), String.t()) :: Role.t() | nil
@@ -55,9 +29,73 @@ defmodule Puedo.Store do
     GenServer.call(server, {:get_role, id})
   end
 
+  @spec put_role(GenServer.server(), Role.t()) :: :ok | {:error, term()}
+  def put_role(server, role) do
+    GenServer.call(server, {:put_role, role})
+  end
+
+  @spec delete_role(GenServer.server(), String.t()) :: :ok | {:error, term()}
+  def delete_role(server, role_id) do
+    GenServer.call(server, {:delete_role, role_id})
+  end
+
+  ########################################################################
+  ############################### RESOURCE ###############################
+  ########################################################################
+
+  @spec list_resources(GenServer.server()) :: [Resource.t()]
+  def list_resources(server) do
+    GenServer.call(server, {:list_resources})
+  end
+
   @spec get_resource(GenServer.server(), String.t()) :: Resource.t() | nil
   def get_resource(server, id) do
     GenServer.call(server, {:get_resource, id})
+  end
+
+  @spec put_resource(GenServer.server(), Resource.t()) :: :ok | {:error, term()}
+  def put_resource(server, resource) do
+    GenServer.call(server, {:put_resource, resource})
+  end
+
+  @spec delete_resource(GenServer.server(), String.t()) :: :ok | {:error, term()}
+  def delete_resource(server, id) do
+    GenServer.call(server, {:delete_resource, id})
+  end
+
+
+  ########################################################################
+  ################################ POLICY ################################
+  ########################################################################
+
+  @spec list_policies(GenServer.server()) :: [Policy.t()]
+  def list_policies(server) do
+    GenServer.call(server, {:list_policies})
+  end
+
+  @spec get_policy(GenServer.server(), String.t()) :: Policy.t() | nil
+  def get_policy(server, id) do
+    GenServer.call(server, {:get_policy, id})
+  end
+
+  @spec put_policy(GenServer.server(), Policy.t()) :: :ok | {:error, term()}
+  def put_policy(server, policy) do
+    GenServer.call(server, {:put_policy, policy})
+  end
+
+  @spec delete_policy(GenServer.server(), String.t()) :: :ok | {:error, term()}
+  def delete_policy(server, policy_id) do
+    GenServer.call(server, {:delete_policy, policy_id})
+  end
+
+
+  ########################################################################
+  ############################### CONDITION ##############################
+  ########################################################################
+
+  @spec list_conditions(GenServer.server()) :: [Condition.t()]
+  def list_conditions(server) do
+    GenServer.call(server, {:list_conditions})
   end
 
   @spec get_condition(GenServer.server(), String.t()) :: Condition.t() | nil
@@ -65,24 +103,14 @@ defmodule Puedo.Store do
     GenServer.call(server, {:get_condition, name})
   end
 
-  @spec list_roles(GenServer.server()) :: [Role.t()]
-  def list_roles(server) do
-    GenServer.call(server, {:list_roles})
+  @spec put_condition(GenServer.server(), Condition.t()) :: :ok | {:error, term()}
+  def put_condition(server, condition) do
+    GenServer.call(server, {:put_condition, condition})
   end
 
-  @spec list_resources(GenServer.server()) :: [Resource.t()]
-  def list_resources(server) do
-    GenServer.call(server, {:list_resources})
-  end
-
-  @spec list_policies(GenServer.server()) :: [Policy.t()]
-  def list_policies(server) do
-    GenServer.call(server, {:list_policies})
-  end
-
-  @spec list_conditions(GenServer.server()) :: [Condition.t()]
-  def list_conditions(server) do
-    GenServer.call(server, {:list_conditions})
+  @spec delete_condition(GenServer.server(), String.t()) :: :ok | {:error, term()}
+  def delete_condition(server, condition_id) do
+    GenServer.call(server, {:delete_condition, condition_id})
   end
 
   @spec snapshot(GenServer.server()) :: Snapshot.t()
@@ -164,6 +192,15 @@ defmodule Puedo.Store do
   end
 
   @impl true
+  def handle_call({:delete_resource, id}, _from, state) do
+    {backend_module, backend_state} = state.backend
+    {:ok, backend_state} = backend_module.delete_resource(backend_state, id)
+    :ets.delete(state.table, {:resource, id})
+    {:reply, :ok, %{state | backend: {backend_module, backend_state}, version: state.version + 1}}
+  end
+
+
+  @impl true
   def handle_call({:get_role, id}, _from, state) do
     {:reply, ets_lookup(state.table, {:role, id}), state}
   end
@@ -171,6 +208,11 @@ defmodule Puedo.Store do
   @impl true
   def handle_call({:get_resource, id}, _from, state) do
     {:reply, ets_lookup(state.table, {:resource, id}), state}
+  end
+
+  @impl true
+  def handle_call({:get_policy, id}, _from, state) do
+    {:reply, ets_lookup(state.table, {:policy, id}), state}
   end
 
   @impl true

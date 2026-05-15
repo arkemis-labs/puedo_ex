@@ -12,4 +12,5 @@ defmodule Puedo.Backend do
   @callback delete_role(state(), id :: String.t()) :: {:ok, state()} | {:error, term()}
   @callback delete_policy(state(), id :: String.t()) :: {:ok, state()} | {:error, term()}
   @callback delete_condition(state(), name :: String.t()) :: {:ok, state()} | {:error, term()}
+  @callback delete_resource(state(), id :: String.t()) :: {:ok, state()} | {:error, term()}
 end

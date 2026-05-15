@@ -102,6 +102,17 @@ defmodule Puedo.StoreTest do
     end
   end
 
+  describe "delete_resource/2" do
+    test "removes a resource and increments version", %{store: store} do
+      :ok = Store.put_resource(store, %Resource{id: "post", actions: ["read"]})
+      assert :ok = Store.delete_resource(store, "post")
+
+      snapshot = Store.snapshot(store)
+      assert snapshot.resources == %{}
+      assert snapshot.version == 2
+    end
+  end
+
   describe "delete_condition/2" do
     test "removes a condition and increments version", %{store: store} do
       :ok = Store.put_condition(store, %Condition{name: "is_owner", op: :eq, field: "subject.id", value: "me"})
@@ -137,6 +148,16 @@ defmodule Puedo.StoreTest do
       resource = %Resource{id: "post", actions: ["read"]}
       :ok = Store.put_resource(store, resource)
       assert Store.get_resource(store, "post") == resource
+    end
+
+    test "get_policy/2 returns nil for missing policy", %{store: store} do
+      assert Store.get_policy(store, "nonexistent") == nil
+    end
+
+    test "get_policy/2 reads from ETS", %{store: store} do
+      policy = %Policy{id: "pol_1", role: "admin", resource: "post", actions: ["read"]}
+      :ok = Store.put_policy(store, policy)
+      assert Store.get_policy(store, "pol_1") == policy
     end
 
     test "get_condition/2 reads from ETS", %{store: store} do

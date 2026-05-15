@@ -28,6 +28,9 @@ defmodule Puedo do
   @spec delete_policy(String.t()) :: :ok | {:error, term()}
   def delete_policy(id), do: Store.delete_policy(@store, id)
 
+  @spec delete_resource(String.t()) :: :ok | {:error, term()}
+  def delete_resource(id), do: Store.delete_resource(@store, id)
+
   @spec delete_condition(String.t()) :: :ok | {:error, term()}
   def delete_condition(name), do: Store.delete_condition(@store, name)
 
@@ -36,6 +39,9 @@ defmodule Puedo do
 
   @spec get_resource(String.t()) :: Resource.t() | nil
   def get_resource(id), do: Store.get_resource(@store, id)
+
+  @spec get_policy(String.t()) :: Policy.t() | nil
+  def get_policy(id), do: Store.get_policy(@store, id)
 
   @spec get_condition(String.t()) :: Condition.t() | nil
   def get_condition(name), do: Store.get_condition(@store, name)
